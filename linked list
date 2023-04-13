@@ -1,0 +1,110 @@
+#include <iostream>
+using namespace std;
+
+class Node {
+public:
+    int data;
+    Node *right;
+    Node *down;
+};
+
+class SparseMatrix {
+private:
+    Node *head;
+public:
+    SparseMatrix() {
+        head = new Node();
+    }
+
+    void add_node(int row, int col, int data) {
+        // create a new node with the given data
+        Node *new_node = new Node();
+        new_node->data = data;
+
+        // traverse the matrix to find the correct position to insert the new node
+        Node *current = head;
+        while (current->right && current->right->data < col) {
+            current = current->right;
+        }
+        while (current->down && current->down->data < row) {
+            current = current->down;
+        }
+
+        // insert the new node
+        if (current->right && current->right->data == col) {
+            current->right->data = data;
+        } else {
+            new_node->right = current->right;
+            current->right = new_node;
+        }
+
+        if (current->down && current->down->data == row) {
+            current->down->data = data;
+        } else {
+            new_node->down = current->down;
+            current->down = new_node;
+        }
+    }
+
+    Node* get_node(int row, int col) {
+        // traverse the matrix to find the node with the given row and column indices
+        Node *current = head->down;
+        while (current) {
+            if (current->data == row) {
+                Node *temp = current->right;
+                while (temp) {
+                    if (temp->data == col) {
+                        return temp;
+                    }
+                    temp = temp->right;
+                }
+            }
+            current = current->down;
+        }
+        return NULL;
+    }
+
+    void delete_node(int row, int col) {
+        // traverse the matrix to find the node with the given row and column indices
+        Node *current = head;
+        while (current) {
+            if (current->right && current->right->data < col) {
+                current = current->right;
+            } else if (current->right && current->right->data == col && current->right->down->data == row) {
+                current->right = current->right->right;
+                break;
+            } else if (current->down && current->down->data < row) {
+                current = current->down;
+            } else if (current->down && current->down->data == row && current->down->right->data == col) {
+                current->down = current->down->down;
+                break;
+            } else {
+                break;
+            }
+        }
+    }
+
+    void print_matrix() {
+        // print the matrix in row-major order
+        int current_row = 0;
+        Node *current = head->down;
+        while (current) {
+            if (current->data == current_row) {
+                for (int i = 0; i < current->right->data; i++) {
+                    cout << "0 ";
+                }
+                cout << current->right->data << " ";
+                current = current->right;
+            } else {
+                for (int i = 0; i < current->right->data; i++) {
+                    cout << "0 ";
+                }
+                cout << endl;
+                current_row += 1;
+                continue;
+            }
+
+            while (current) {
+                if (current->data == current_row) {
+                    cout << current->right->data << " ";
+                    current
